@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "defaultProject": "tms-web",
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": ["default"]
+  },
+  "targetDefaults": {
+    "build": {
+      "cache": true,
+      "outputs": ["{projectRoot}/dist", "{projectRoot}/build", "{projectRoot}/target"]
+    },
+    "test": {
+      "cache": true,
+      "outputs": ["{projectRoot}/coverage"]
+    },
+    "lint": {
+      "cache": true
+    }
+  }
+}

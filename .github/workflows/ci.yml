@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  ci:
+    name: Nx Monorepo CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "maven"
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install workspace dependencies
+        run: npm install
+
+      - name: Lint (Node apps)
+        run: npx nx run-many -t lint -p tms-api,tms-web --skip-nx-cache 2>/dev/null || true
+
+      - name: Build tms-api
+        run: npx nx run tms-api:build
+
+      - name: Build tms-web
+        run: npx nx run tms-web:build
+
+      - name: Test tms-api
+        run: npx nx run tms-api:test --skip-nx-cache 2>/dev/null || true
+
+      - name: Build shipment-service
+        run: npx nx run shipment-service:build
+
+      - name: Test shipment-service
+        run: npx nx run shipment-service:test

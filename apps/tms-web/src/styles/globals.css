@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: 220 90% 45%;
+  --color-primary-foreground: 0 0% 100%;
+  --color-surface: 0 0% 98%;
+  --color-surface-elevated: 0 0% 100%;
+  --color-border: 220 13% 88%;
+  --color-muted: 220 13% 92%;
+  --color-muted-foreground: 220 9% 40%;
+  --color-primary-text: 220 20% 15%;
+  --color-destructive: 0 72% 51%;
+  --color-sidebar: 220 25% 12%;
+  --color-sidebar-border: 220 15% 22%;
+}
+
+body {
+  background-color: hsl(var(--color-surface));
+  color: hsl(var(--color-primary-text));
+  -webkit-font-smoothing: antialiased;
+}
+
+.text-primary {
+  color: hsl(var(--color-primary-text));
+}
+.bg-surface {
+  background-color: hsl(var(--color-surface));
+}
+.bg-surface-elevated {
+  background-color: hsl(var(--color-surface-elevated));
+}
+.border-border {
+  border-color: hsl(var(--color-border));
+}

@@ -1,0 +1,37 @@
+{
+  "name": "shipment-service",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "mvn -q compile -DskipTests",
+        "cwd": "{projectRoot}"
+      },
+      "outputs": ["{projectRoot}/target"],
+      "configurations": {
+        "production": {
+          "command": "mvn -q package -DskipTests",
+          "cwd": "{projectRoot}"
+        }
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "mvn spring-boot:run",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "mvn -B test",
+        "cwd": "{projectRoot}"
+      }
+    }
+  },
+  "tags": ["scope:shipment", "type:app"]
+}
