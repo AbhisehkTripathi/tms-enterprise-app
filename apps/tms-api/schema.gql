@@ -3,14 +3,115 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type Category {
+  createdAt: DateTime!
+  description: String!
+  id: String!
+  name: String!
+  status: Int!
+  updatedAt: DateTime!
+}
+
+input CategoryInput {
+  description: String!
+  name: String!
+  status: Int
+}
+
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
+
 type Mutation {
+  addShipment(input: ShipmentInput!): Shipment!
+  createCategory(input: CategoryInput!): Category!
+  createRole(input: RoleInput!): Role!
+  createStorage(input: StorageInput!): Storage!
   createUser(input: UserInput!): User!
+  deleteCategory(id: String!): Boolean!
+  deleteRole(id: String!): Boolean!
+  deleteStorage(id: String!): Boolean!
+  updateCategory(id: String!, input: CategoryInput!): Category!
+  updateRole(id: String!, input: RoleInput!): Role!
+  updateShipment(id: String!, input: ShipmentInput!): Shipment!
+  updateStorage(id: String!, input: StorageInput!): Storage!
   updateUser(id: Float!, input: UserInput!): User!
 }
 
 type Query {
+  categories: [Category!]!
+  category(id: String!): Category
   getUser(id: Float!): User!
   getUsers: [User!]!
+  listShipments(carrierName: String, shipperName: String, sortBy: String, sortOrder: String, status: String): [Shipment!]!
+  role(id: String!): Role
+  roles: [Role!]!
+  shipment(id: String!): Shipment
+  shipmentsPaginated(carrierName: String, page: Int = 1, pageSize: Int = 10, shipperName: String, sortBy: String, sortOrder: String, status: String): ShipmentPage!
+  storage(id: String!): Storage
+  storages: [Storage!]!
+}
+
+type Role {
+  createdAt: DateTime!
+  description: String!
+  id: String!
+  name: String!
+  status: Int!
+  updatedAt: DateTime!
+}
+
+input RoleInput {
+  description: String!
+  name: String!
+  status: Int
+}
+
+type Shipment {
+  carrierName: String!
+  createdAt: DateTime!
+  deliveryLocation: String!
+  id: String!
+  pickupLocation: String!
+  rate: String!
+  shipperName: String!
+  status: String!
+  trackingData: String
+  trackingNumber: String
+  updatedAt: DateTime!
+}
+
+input ShipmentInput {
+  carrierName: String!
+  deliveryLocation: String!
+  pickupLocation: String!
+  rate: Float
+  shipperName: String!
+  status: String
+  trackingData: String
+  trackingNumber: String
+}
+
+type ShipmentPage {
+  items: [Shipment!]!
+  page: Int!
+  pageSize: Int!
+  totalCount: Int!
+  totalPages: Int!
+}
+
+type Storage {
+  createdAt: DateTime!
+  id: String!
+  name: String!
+  path: String!
+  updatedAt: DateTime!
+}
+
+input StorageInput {
+  name: String!
+  path: String!
 }
 
 type User {

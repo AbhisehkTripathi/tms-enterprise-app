@@ -3,7 +3,7 @@ import { setContext } from "@apollo/client/link/context";
 import { getAuth } from "./auth";
 
 const graphqlUri =
-  import.meta.env.VITE_GRAPHQL_URI ?? "http://localhost:4000/api/v1/user";
+  import.meta.env.VITE_GRAPHQL_URI ?? "http://localhost:3010/api/v1/user";
 
 const authLink = setContext((_, { headers }) => {
   const auth = getAuth();

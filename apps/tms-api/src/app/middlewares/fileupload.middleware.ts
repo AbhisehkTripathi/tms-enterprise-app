@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import multer, { Multer } from 'multer';
-import path from 'path';
+import { Request, Response, NextFunction } from "express";
+import multer, { Multer } from "multer";
+import path from "path";
 // // Create Multer instance with desired configuration
 // const filePath = path.join(__dirname, '../../public');
 // // const storage = multer.diskStorage({
@@ -46,10 +46,10 @@ export const uploadFile= (storageType:string) =>{
             // Create Multer instance with desired configuration
             const filePath = path.join(__dirname, '../../public');
              storage = multer.diskStorage({
-              destination: (req: Request, file: Express.Multer.File, cb: Function) => {
+              destination: (req: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
                 cb(null, filePath);
               },
-              filename: (req: Request, file: Express.Multer.File, cb: Function) => {
+              filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
                 cb(null, `${file.originalname}-${Date.now()}`);
               },
             });
@@ -60,18 +60,13 @@ export const uploadFile= (storageType:string) =>{
     // Use Multer middleware to upload single file with name 'file'
         const uploadFile = upload.single('file');
 
-        uploadFile(req, res, (err: any) => {
-        if (err) {
-        next(err);
-        }
-
-        // Parse form data and add file information to request body
-        req.body = {
-        ...req.body,
-        ...{ file: req.file },
-        };
-
-        next();
-    });
-}
-}
+        uploadFile(req, res, (err: unknown) => {
+          if (err) {
+            next(err);
+            return;
+          }
+          req.body = { ...req.body, ...{ file: req.file } };
+          next();
+        });
+    };
+  }

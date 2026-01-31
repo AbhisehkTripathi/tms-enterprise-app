@@ -1,22 +1,21 @@
-import { Schema, Document ,model} from "mongoose";
-
-export interface IStorageDocument extends Document {
+/**
+ * Storage data shape only. No database or Mongoose.
+ */
+export interface IStorage {
+  id: string;
   name: string;
   path: string;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt?: Date;
+  deletedAt?: Date | null;
 }
 
-const StorageSchema = new Schema<IStorageDocument>({
-  name: { type: String, required: true },
-  path: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-  deletedAt: { type: Date, default: null },
-});
+export interface IStorageCreate {
+  name: string;
+  path: string;
+}
 
-
-const StorageModel = model<IStorageDocument>("Storage", StorageSchema);
-
-export default StorageModel;
+export interface IStorageUpdate {
+  name?: string;
+  path?: string;
+}

@@ -2,7 +2,7 @@ package com.tms.shipment.app.controllers;
 
 import com.tms.shipment.app.models.ShipmentDto;
 import com.tms.shipment.app.services.ShipmentService;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -26,11 +26,11 @@ export class ShipmentResolver {
   @Query(() => [Shipment])
   @Authorized("admin", "employee")
   async listShipments(
-    @Arg("status", { nullable: true }) status: string | undefined,
-    @Arg("shipperName", { nullable: true }) shipperName: string | undefined,
-    @Arg("carrierName", { nullable: true }) carrierName: string | undefined,
-    @Arg("sortBy", { nullable: true }) sortBy: string | undefined,
-    @Arg("sortOrder", { nullable: true }) sortOrder: "ASC" | "DESC" | undefined
+    @Arg("status", () => String, { nullable: true }) status: string | undefined,
+    @Arg("shipperName", () => String, { nullable: true }) shipperName: string | undefined,
+    @Arg("carrierName", () => String, { nullable: true }) carrierName: string | undefined,
+    @Arg("sortBy", () => String, { nullable: true }) sortBy: string | undefined,
+    @Arg("sortOrder", () => String, { nullable: true }) sortOrder: "ASC" | "DESC" | undefined
   ): Promise<Shipment[]> {
     const sort = [sortBy ?? "createdAt", sortOrder === "ASC" ? "asc" : "desc"].join(":");
     const result = await shipmentService.list({
@@ -47,7 +47,7 @@ export class ShipmentResolver {
 
   @Query(() => Shipment, { nullable: true })
   @Authorized("admin", "employee")
-  async shipment(@Arg("id") id: string): Promise<Shipment | null> {
+  async shipment(@Arg("id", () => String) id: string): Promise<Shipment | null> {
     const result = await shipmentService.retrieve(id);
     if (!result.success || !result.data) return null;
     return toShipment(result.data);
@@ -58,11 +58,11 @@ export class ShipmentResolver {
   async shipmentsPaginated(
     @Arg("page", () => Int, { defaultValue: 1 }) page: number,
     @Arg("pageSize", () => Int, { defaultValue: 10 }) pageSize: number,
-    @Arg("status", { nullable: true }) status: string | undefined,
-    @Arg("shipperName", { nullable: true }) shipperName: string | undefined,
-    @Arg("carrierName", { nullable: true }) carrierName: string | undefined,
-    @Arg("sortBy", { nullable: true }) sortBy: string | undefined,
-    @Arg("sortOrder", { nullable: true }) sortOrder: "ASC" | "DESC" | undefined
+    @Arg("status", () => String, { nullable: true }) status: string | undefined,
+    @Arg("shipperName", () => String, { nullable: true }) shipperName: string | undefined,
+    @Arg("carrierName", () => String, { nullable: true }) carrierName: string | undefined,
+    @Arg("sortBy", () => String, { nullable: true }) sortBy: string | undefined,
+    @Arg("sortOrder", () => String, { nullable: true }) sortOrder: "ASC" | "DESC" | undefined
   ): Promise<ShipmentPage> {
     const sort = [sortBy ?? "createdAt", sortOrder === "ASC" ? "asc" : "desc"].join(":");
     const result = await shipmentService.list({
@@ -88,7 +88,7 @@ export class ShipmentResolver {
 
   @Mutation(() => Shipment)
   @Authorized("admin")
-  async addShipment(@Arg("input") input: ShipmentInput): Promise<Shipment> {
+  async addShipment(@Arg("input", () => ShipmentInput) input: ShipmentInput): Promise<Shipment> {
     const result = await shipmentService.create({
       shipperName: input.shipperName,
       carrierName: input.carrierName,
@@ -106,8 +106,8 @@ export class ShipmentResolver {
   @Mutation(() => Shipment)
   @Authorized("admin")
   async updateShipment(
-    @Arg("id") id: string,
-    @Arg("input") input: ShipmentInput
+    @Arg("id", () => String) id: string,
+    @Arg("input", () => ShipmentInput) input: ShipmentInput
   ): Promise<Shipment> {
     const result = await shipmentService.update(id, {
       shipperName: input.shipperName,

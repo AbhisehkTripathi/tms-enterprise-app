@@ -49,7 +49,7 @@ export function ShipmentDetailPage(): React.ReactElement {
         <button
           type="button"
           onClick={() => navigate("/shipments")}
-          className="mb-4 text-sm text-blue-600 hover:underline"
+          className="mb-4 text-sm text-accent hover:underline font-medium"
         >
           ← Back to shipments
         </button>

@@ -3,68 +3,68 @@ import { Length, IsOptional, IsNumber, Min } from "class-validator";
 
 @ObjectType()
 export class Shipment {
-  @Field()
+  @Field(() => String)
   id!: string;
 
-  @Field()
+  @Field(() => String)
   shipperName!: string;
 
-  @Field()
+  @Field(() => String)
   carrierName!: string;
 
-  @Field()
+  @Field(() => String)
   pickupLocation!: string;
 
-  @Field()
+  @Field(() => String)
   deliveryLocation!: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   trackingNumber!: string | null;
 
-  @Field()
+  @Field(() => String)
   status!: string;
 
-  @Field()
+  @Field(() => String)
   rate!: string;
 
   @Field(() => String, { nullable: true })
   trackingData!: Record<string, unknown> | null;
 
-  @Field()
+  @Field(() => Date)
   createdAt!: Date;
 
-  @Field()
+  @Field(() => Date)
   updatedAt!: Date;
 }
 
 @InputType()
 export class ShipmentInput {
-  @Field()
+  @Field(() => String)
   @Length(1, 255)
   shipperName!: string;
 
-  @Field()
+  @Field(() => String)
   @Length(1, 255)
   carrierName!: string;
 
-  @Field()
+  @Field(() => String)
   @Length(1, 500)
   pickupLocation!: string;
 
-  @Field()
+  @Field(() => String)
   @Length(1, 500)
   deliveryLocation!: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @Length(0, 100)
   trackingNumber!: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   status!: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
   @Min(0)

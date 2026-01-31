@@ -54,8 +54,8 @@ static  async datatable(req: Request, res: Response) {
   }
 
     static async search(req: Request, res: Response) {
-    const query = req.query.q;
-    let roleService=new RoleService();
+    const query = typeof req.query.q === "string" ? req.query.q : "";
+    const roleService = new RoleService();
     const results = await roleService.searchRoles(query);
     res.status(results.statusCode).json(results);
      

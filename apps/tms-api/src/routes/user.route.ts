@@ -3,6 +3,9 @@ import { buildSchema } from "type-graphql";
 import { graphqlHTTP } from "express-graphql";
 import { UsersResolver } from "@services/user.service";
 import { ShipmentResolver } from "@services/shipment.resolver";
+import { RoleResolver } from "@services/role.resolver";
+import { CategoryResolver } from "@services/category.resolver";
+import { StorageResolver } from "@services/storage.resolver";
 import { authChecker } from "@config/auth";
 import type { GraphQLContext } from "@config/auth";
 
@@ -10,7 +13,13 @@ const route = express.Router();
 
 const getSchema = async () => {
   return buildSchema({
-    resolvers: [UsersResolver, ShipmentResolver],
+    resolvers: [
+      UsersResolver,
+      ShipmentResolver,
+      RoleResolver,
+      CategoryResolver,
+      StorageResolver,
+    ],
     emitSchemaFile: true,
     authChecker,
   });

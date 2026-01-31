@@ -83,20 +83,20 @@ app.use(errorHandler);
 
 // Handle connection events
 
+const startServer = () => {
+  app.listen(process.env.APP_PORT, () => {
+    console.log(
+      `Server started at http://${process.env.APP_HOST}:${process.env.APP_PORT}`
+    );
+  });
+};
+
 AppDataSource.initialize()
-    .then(() => {
-      // const server = new ApolloServer({ typeDefs, resolvers });
-      // await server.start()
-      // server.applyMiddleware({ app });
-      app.listen(process.env.APP_PORT,async () => {
-        console.log(
-          `Server started with port http://${process.env.APP_HOST}:${process.env.APP_PORT}`
-        );
-      });
-    })
-    .catch((err) => {
-        console.error("Error during Data Source initialization", err)
-    })
+  .then(startServer)
+  .catch((err: Error) => {
+    console.error("Data Source init failed (optional, in-memory data used):", err.message);
+    startServer();
+  });
 
 
   

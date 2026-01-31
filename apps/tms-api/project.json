@@ -38,7 +38,7 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npm run lint 2>/dev/null || echo 'No lint script'",
+        "command": "npm run lint",
         "cwd": "{projectRoot}"
       }
     }

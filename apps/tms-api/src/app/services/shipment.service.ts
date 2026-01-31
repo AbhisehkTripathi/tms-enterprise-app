@@ -57,8 +57,8 @@ export default class ShipmentService {
       const sortParams = (query.sort ?? "createdAt:desc").split(":");
       const [sortBy, order] = sortParams.length === 2 ? sortParams : ["createdAt", "desc"];
       filtered.sort((a, b) => {
-        const aVal = (a as Record<string, unknown>)[sortBy];
-        const bVal = (b as Record<string, unknown>)[sortBy];
+        const aVal = (a as unknown as Record<string, unknown>)[sortBy];
+        const bVal = (b as unknown as Record<string, unknown>)[sortBy];
         if (aVal instanceof Date && bVal instanceof Date)
           return order === "desc" ? bVal.getTime() - aVal.getTime() : aVal.getTime() - bVal.getTime();
         const aStr = String(aVal ?? "");
@@ -83,7 +83,13 @@ export default class ShipmentService {
       return new Response(true, 200, "Read operation successful", output);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Internal Server Error";
-      return new Response(false, 500, "Internal Server Error", undefined, undefined, message);
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<{
+        records: IShipment[];
+        totalCount: number;
+        totalPages: number;
+        currentPage: number;
+        filterCount: number;
+      }>;
     }
   }
 
@@ -100,7 +106,7 @@ export default class ShipmentService {
       return new Response(true, 200, "Read operation successful", record);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Internal Server Error";
-      return new Response(false, 500, "Internal Server Error", undefined, undefined, message);
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<IShipment | undefined>;
     }
   }
 
@@ -129,7 +135,7 @@ export default class ShipmentService {
       return new Response(true, 201, "Insert operation successful", record);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Internal Server Error";
-      return new Response(false, 500, "Internal Server Error", undefined, undefined, message);
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<IShipment>;
     }
   }
 
@@ -160,7 +166,7 @@ export default class ShipmentService {
       return new Response(true, 200, "Update operation successful", updated);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Internal Server Error";
-      return new Response(false, 500, "Internal Server Error", undefined, undefined, message);
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<IShipment>;
     }
   }
 
@@ -178,7 +184,7 @@ export default class ShipmentService {
       return new Response(true, 200, "Delete operation successful", removed);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Internal Server Error";
-      return new Response(false, 500, "Internal Server Error", undefined, undefined, message);
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<IShipment | undefined>;
     }
   }
 
@@ -187,7 +193,7 @@ export default class ShipmentService {
       return new Response(true, 200, "Count operation successful", store.length);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Internal Server Error";
-      return new Response(false, 500, "Internal Server Error", undefined, undefined, message);
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<number>;
     }
   }
 }

@@ -16,13 +16,13 @@ const pgSessionStore = new (pgSession(session))({
   tableName: 'session',
 });
 
-const sessionMiddleware = (req:Request,res:Response,next:NextFunction) => {
-    return session({
-        store: pgSessionStore,
-        secret: '11a5e473653ae07ef6742ab95d4c09681e093930e77da',
-        resave: false,
-        saveUninitialized: false,
-    })(req,res,next)
-}
+const sessionMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  return session({
+    store: pgSessionStore,
+    secret: "11a5e473653ae07ef6742ab95d4c09681e093930e77da",
+    resave: false,
+    saveUninitialized: false,
+  })(req, res, next);
+};
 
 export default sessionMiddleware

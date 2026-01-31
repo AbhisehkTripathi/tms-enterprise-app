@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: 220 90% 45%;
+  /* White + light red theme */
+  --color-primary: 0 65% 52%;
   --color-primary-foreground: 0 0% 100%;
-  --color-surface: 0 0% 98%;
-  --color-surface-elevated: 0 0% 100%;
-  --color-border: 220 13% 88%;
-  --color-muted: 220 13% 92%;
-  --color-muted-foreground: 220 9% 40%;
-  --color-primary-text: 220 20% 15%;
+  --color-surface: 0 0% 100%;
+  --color-surface-elevated: 0 20% 99%;
+  --color-border: 0 25% 91%;
+  --color-muted: 0 20% 96%;
+  --color-muted-foreground: 0 10% 42%;
+  --color-primary-text: 0 15% 18%;
   --color-destructive: 0 72% 51%;
-  --color-sidebar: 220 25% 12%;
-  --color-sidebar-border: 220 15% 22%;
+  --color-sidebar: 0 45% 97%;
+  --color-sidebar-border: 0 35% 90%;
 }
 
 body {
@@ -23,12 +24,36 @@ body {
 .text-primary {
   color: hsl(var(--color-primary-text));
 }
+.text-accent {
+  color: hsl(var(--color-primary));
+}
+.text-accent:hover {
+  color: hsl(0 65% 42%);
+}
 .bg-surface {
   background-color: hsl(var(--color-surface));
 }
 .bg-surface-elevated {
   background-color: hsl(var(--color-surface-elevated));
 }
+.bg-primary {
+  background-color: hsl(var(--color-primary));
+}
+.bg-primary:hover {
+  background-color: hsl(0 65% 45%);
+}
 .border-border {
   border-color: hsl(var(--color-border));
+}
+.bg-muted {
+  background-color: hsl(var(--color-muted));
+}
+.text-muted-foreground {
+  color: hsl(var(--color-muted-foreground));
+}
+.bg-primary-text {
+  background-color: hsl(var(--color-primary-text));
+}
+.text-primary-foreground {
+  color: hsl(var(--color-primary-foreground));
 }

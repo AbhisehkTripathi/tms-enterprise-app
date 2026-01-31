@@ -33,12 +33,12 @@ export function ShipmentTileView({ shipments, totalPages, page, onPageChange }: 
               <span className="text-xs font-medium text-muted-foreground uppercase">{s.status}</span>
               <span className="text-sm font-medium">{formatRate(s.rate)}</span>
             </div>
-            <p className="font-medium text-primary truncate">{s.shipperName} → {s.carrierName}</p>
+            <p className="font-medium text-primary-text truncate">{s.shipperName} → {s.carrierName}</p>
             <p className="text-sm text-muted-foreground truncate" title={s.pickupLocation}>{s.pickupLocation}</p>
             <p className="text-sm text-muted-foreground truncate" title={s.deliveryLocation}>{s.deliveryLocation}</p>
             <p className="text-xs text-muted-foreground mt-2">{formatDate(s.createdAt)}</p>
             <div className="mt-3 flex gap-2">
-              <Link to={`/shipments/${s.id}`} className="text-sm text-blue-600 hover:underline">
+              <Link to={`/shipments/${s.id}`} className="text-sm text-accent hover:underline font-medium">
                 View details
               </Link>
             </div>
@@ -51,16 +51,16 @@ export function ShipmentTileView({ shipments, totalPages, page, onPageChange }: 
             type="button"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
-            className="px-3 py-1 rounded border border-border disabled:opacity-50"
+            className="px-3 py-1.5 rounded-md border border-border bg-surface-elevated hover:bg-muted disabled:opacity-50 text-sm"
           >
             Previous
           </button>
-          <span className="px-3 py-1 text-sm">Page {page} of {totalPages}</span>
+          <span className="px-3 py-1.5 text-sm text-muted-foreground">Page {page} of {totalPages}</span>
           <button
             type="button"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
-            className="px-3 py-1 rounded border border-border disabled:opacity-50"
+            className="px-3 py-1.5 rounded-md border border-border bg-surface-elevated hover:bg-muted disabled:opacity-50 text-sm"
           >
             Next
           </button>

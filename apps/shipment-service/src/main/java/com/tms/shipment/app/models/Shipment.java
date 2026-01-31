@@ -1,6 +1,7 @@
 package com.tms.shipment.app.models;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Map;
@@ -10,7 +11,8 @@ import java.util.Map;
 public class Shipment {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+  @GeneratedValue(generator = "uuid")
+  @GenericGenerator(name = "uuid", strategy = "uuid2")
   private String id;
 
   @Column(nullable = false, length = 255)

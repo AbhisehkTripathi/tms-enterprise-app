@@ -1,227 +1,117 @@
-import  Storage  from "@models/storage.schema";
-import Service from "@libs/service";
-import Response from "@libs/response"
-import AppDataSource from "@config/mongoose";
-import * as AWS from 'aws-sdk';
-import { ObjectId} from 'mongodb';
+import { v4 as uuid } from "uuid";
+import Response from "@libs/response";
+import type { IStorage, IStorageCreate, IStorageUpdate } from "@models/storage.schema";
 
-// Define the AWS S3 configuration
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
+const store: IStorage[] = [];
 
-});
-
-export default class StorageService extends Service {
-  private storageModel:any;
-  constructor() {
-    super()
-    this.storageModel = Storage;
-  }
-  async count():Promise<Response<any[]>> {
+export default class StorageService {
+  async count(): Promise<Response<number>> {
     try {
-        const result = await this.storageModel.count()
-        if(!result) {
-          return new Response<any[]>(true, 200, "Record not available", result);
-        }
-        return new Response<any[]>(true,200, "Count operation successful",result);
-      } catch (error:any) {
-        return new Response<any[]>(false,500, "Internal Server Error", undefined, undefined,error.message);
-      }
-  }
-
-  async list():Promise<Response<any[]>> {
-    try {
-      const record = await this.storageModel.find()
-      if(!record) {
-        return new Response<any[]>(true, 200, "Record not available", record);
-      }
-      return new Response<any[]>(true,200, "Read operation successful",record);
-    } catch (error:any) {
-        return new Response<any[]>(false,500, "Internal Server Error", undefined, undefined,error.message);
-      }
-  }
-
-  async retrieve(pid: string):Promise<Response<any[]>> {
-    try {
-      const isValidObjectId = ObjectId.isValid(pid);
-      if (!isValidObjectId) {
-        return new Response<any[]>(false, 400, "Invalid ObjectId", undefined);
-      }
-      let id=new ObjectId(pid);
-      const records = await this.storageModel.findOne(id);
-      if (!records) {
-        return new Response<any[]>(true, 200, "Record not available", records);
-      }
-      return new Response<any[]>(true,200, "Read operation successful",records);
-    } catch (error:any) {
-        return new Response<any[]>(false,500, "Internal Server Error", undefined, undefined,error.message);
-      }
-  }
-
-  async retrieveByFilename(fileName: string):Promise<Response<any[]>> {
-    try {
-      const records = await this.storageModel.findOne({ where: { name: fileName } });
-      const params = {
-        Bucket: process.env.AWS_BUCKET || '',
-        Key: fileName,
-      };
-      return new Promise((resolve, reject) => {
-        s3.getObject(params, (err: any, response: any) => {
-          if (err) {
-            console.error(err);
-            reject(err)
-          } else {
-            // res.setHeader('Content-Type', data.ContentType);
-            // res.send(data.Body);
-            resolve(response.Body)
-          }
-        })
-      })
-    } catch (error:any) {
-        return new Response<any[]>(false,500, "Internal Server Error", undefined, undefined,error.message);
-      }
-  }
-
-  async create(file: any, directoryname: string):Promise<Response<any[]>> {
-    try {
-      // Get the file content and name from the request
-      const fileContent = file.buffer;
-      const fileName = directoryname + "/" + file.originalname;
-      const name = file.originalname;
-      const params = {
-        Bucket: process.env.AWS_BUCKET || '',
-        Key: fileName,
-        Body: fileContent,
-      };
-      return new Promise((resolve, reject) => {
-        s3.upload(params, async (err: any, response: any) => {
-          if (err) {
-            console.error(err);
-            reject (new Response<any[]>(false, 500, "Storage Server Error", err))
-          } else {
-            console.log(`File uploaded successfully. ${response.Location}`);
-            const storage = new Storage();
-            storage.name = name;
-            storage.path = response.Location;
-            const result:any = await storage.save();
-            resolve (new Response<any[]>(true, 200, "Storage operation successful", result))
-          }
-        });
-      })
-      
-    } catch (error:any) {
-        return new Response<any[]>(false,500, "Internal Server Error", undefined, undefined,error.message);
-      }
-  }
-
-  async createFromBuffer(buffer: any, directoryname: string, file: string):Promise<Response<any[]>> {
-    try {
-      // Get the file content and name from the request
-      const fileContent = buffer;
-      const fileName = directoryname + "/" + file;
-      const name = file;
-      const params = {
-        Bucket: process.env.AWS_BUCKET || '',
-        Key: fileName,
-        Body: fileContent,
-      };
-      return new Promise((resolve, reject) => {
-        s3.upload(params, async (err: any, response: any) => {
-          if (err) {
-            console.error(err);
-            reject(err);
-          } else {
-            console.log(`File uploaded successfully. ${response.Location}`);
-            const storage = new Storage();
-            storage.name = name;
-            storage.path = response.Location;
-            const result:any = await storage.save();
-            resolve(new Response<any[]>(true, 200, "Storage operation successful", result));
-          }
-        });
-      })
-    } catch (error:any) {
-        return new Response<any[]>(false,500, "Internal Server Error", undefined, undefined,error.message);
-      }
-  }
-
-  async update(pid: string, data: any):Promise<Response<any[]>> {
-    const fileContent = data.buffer;
-    const fileName = data.originalname;
-    const isValidObjectId = ObjectId.isValid(pid);
-    if (!isValidObjectId) {
-      return new Response<any[]>(false, 400, "Invalid ObjectId", undefined);
+      const count = store.filter((r) => r.deletedAt == null).length;
+      return new Response(true, 200, "Count operation successful", count);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<number>;
     }
-    let id=new ObjectId(pid);
-    const role = await this.storageModel.findOneBy(id);
-    if(!role){
-      return new Response<any[]>(true, 200, "Record not available", role);
+  }
+
+  async list(): Promise<Response<IStorage[]>> {
+    try {
+      const list = store.filter((r) => r.deletedAt == null);
+      return new Response(true, 200, "Read operation successful", list);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<IStorage[]>;
     }
-    const params = {
-      Bucket: 'codegify',
-      Key: fileName,
-      Body: fileContent,
-    };
-    return new Promise((resolve, reject) => {
-      s3.upload(params, async (err: any, response: any) => {
-        if (err) {
-          console.error(err);
-          reject (new Response<any[]>(false, 500, "Storage Server Error", err))
-        } else {
-          try {
-            console.log(`File upldated successfully. ${response.Location}`);
-            const storage = await this.storageModel.findOneOrFail( id )
-            storage.name = fileName;
-            storage.path = response.Location;
-            const result = await this.storageModel.save(storage)
-            resolve (new Response<any[]>(true, 200, "Storage operation successful", result))
-          } catch (error) {
-            reject (new Response<any[]>(false, 500, "Storage Server Error", err))
-          }
-        }
-      })
-    })
   }
 
-  async delete(pid: string):Promise<Response<any[]>> {
+  async retrieve(id: string): Promise<Response<IStorage | undefined>> {
     try {
-      let id=new ObjectId(pid);
-      const storage = await this.storageModel.findOneOrFail(id )
-      const params = {
-        Bucket: 'codegify',
-        Key: storage.name,
+      const record = store.find((r) => r.id === id && r.deletedAt == null);
+      if (!record) return new Response(true, 200, "Record not available", undefined);
+      return new Response(true, 200, "Read operation successful", record);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<IStorage | undefined>;
+    }
+  }
+
+  async create(data: IStorageCreate): Promise<Response<IStorage>> {
+    try {
+      const now = new Date();
+      const record: IStorage = {
+        id: uuid(),
+        name: data.name,
+        path: data.path,
+        createdAt: now,
+        updatedAt: now,
       };
-      return new Promise((resolve, reject) => {
-        s3.deleteObject(params, async (err: any, response: any) => {
-          if (err) {
-            console.error(err);
-            reject(err)
-          } else {
-            console.log(`File deleted successfully. ${response.Location}`);
-            const result = await this.storageModel.delete(id);
-            resolve(result)
-          }
-        })
-      })
-    } catch (error:any) {
-        return new Response<any[]>(false,500, "Internal Server Error", undefined, undefined,error.message);
-      }
+      store.push(record);
+      return new Response(true, 201, "Insert operation successful", record);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<IStorage>;
+    }
   }
 
-  async datatable():Promise<Response<any[]>> {
+  async update(id: string, data: IStorageUpdate): Promise<Response<IStorage>> {
     try {
-      const records = await this.storageModel.find({
-        order: {
-          id: "DESC",
-        },
-        skip: 0,
-        take: 10,
-      });
-      return records
-    } catch (error:any) {
-        return new Response<any[]>(false,500, "Internal Server Error", undefined, undefined,error.message);
-      }
+      const idx = store.findIndex((r) => r.id === id);
+      if (idx === -1) return new Response(true, 200, "Record not available", undefined as unknown as IStorage);
+      const existing = store[idx];
+      const updated: IStorage = {
+        ...existing,
+        ...(data.name != null && { name: data.name }),
+        ...(data.path != null && { path: data.path }),
+        updatedAt: new Date(),
+      };
+      store[idx] = updated;
+      return new Response(true, 200, "Update operation successful", updated);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<IStorage>;
+    }
+  }
+
+  async delete(id: string): Promise<Response<IStorage | undefined>> {
+    try {
+      const idx = store.findIndex((r) => r.id === id);
+      if (idx === -1) return new Response(true, 200, "Record not available", undefined);
+      const now = new Date();
+      store[idx] = { ...store[idx], deletedAt: now, updatedAt: now };
+      return new Response(true, 200, "Delete operation successful", store[idx]);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<IStorage | undefined>;
+    }
+  }
+
+  async datatable(data: { page?: number; limit?: number }): Promise<Response<{
+    records: IStorage[];
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
+    filterCount: number;
+  }>> {
+    try {
+      const filtered = store.filter((r) => r.deletedAt == null);
+      const page = Math.max(1, Number(data.page) || 1);
+      const limit = Math.min(100, Math.max(1, Number(data.limit) || 10));
+      const totalCount = filtered.length;
+      const totalPages = Math.ceil(totalCount / limit) || 1;
+      const skip = (page - 1) * limit;
+      const records = filtered.slice(skip, skip + limit);
+      const output = { records, totalCount, totalPages, currentPage: page, filterCount: records.length };
+      return new Response(true, 200, "Read operation successful", output);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<{
+        records: IStorage[];
+        totalCount: number;
+        totalPages: number;
+        currentPage: number;
+        filterCount: number;
+      }>;
+    }
   }
 }

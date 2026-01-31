@@ -1,11 +1,13 @@
-import { Schema, Document, model } from 'mongoose';
-
+/**
+ * Role data shape only. No database or Mongoose.
+ */
 export enum RoleStatus {
   Active = 1,
   Inactive = 0,
 }
 
-export interface IRole extends Document {
+export interface IRole {
+  id: string;
   name: string;
   description: string;
   status: RoleStatus;
@@ -14,15 +16,14 @@ export interface IRole extends Document {
   deletedAt?: Date | null;
 }
 
-const RoleSchema: Schema = new Schema({
-  name: { type: String, required: true },
-  description: { type: String, required: true },
-  status: { type: Number, enum: [0, 1], default: 1 },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-  deletedAt: { type: Date, default: null },
-});
+export interface IRoleCreate {
+  name: string;
+  description: string;
+  status?: RoleStatus;
+}
 
-const Role = model<IRole>('Role', RoleSchema);
-
-export default Role;
+export interface IRoleUpdate {
+  name?: string;
+  description?: string;
+  status?: RoleStatus;
+}

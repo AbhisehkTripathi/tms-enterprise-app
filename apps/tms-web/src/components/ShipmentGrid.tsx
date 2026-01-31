@@ -39,7 +39,7 @@ export function ShipmentGrid({ shipments, totalPages, page, onPageChange }: Ship
         <thead>
           <tr className="bg-muted">
             {COLUMNS.map((col) => (
-              <th key={col} className="text-left px-4 py-3 text-sm font-medium text-primary border-b border-border">
+              <th key={col} className="text-left px-4 py-3 text-sm font-medium text-accent border-b border-border">
                 {col}
               </th>
             ))}
@@ -57,7 +57,7 @@ export function ShipmentGrid({ shipments, totalPages, page, onPageChange }: Ship
               <td className="px-4 py-2 text-sm">{formatRate(s.rate)}</td>
               <td className="px-4 py-2 text-sm">{formatDate(s.createdAt)}</td>
               <td className="px-4 py-2">
-                <Link to={`/shipments/${s.id}`} className="text-blue-600 hover:underline text-sm">
+                <Link to={`/shipments/${s.id}`} className="text-accent hover:underline text-sm font-medium">
                   View
                 </Link>
               </td>
@@ -71,16 +71,16 @@ export function ShipmentGrid({ shipments, totalPages, page, onPageChange }: Ship
             type="button"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
-            className="px-3 py-1 rounded border border-border disabled:opacity-50"
+            className="px-3 py-1.5 rounded-md border border-border bg-surface-elevated hover:bg-muted disabled:opacity-50 text-sm"
           >
             Previous
           </button>
-          <span className="px-3 py-1 text-sm">Page {page} of {totalPages}</span>
+          <span className="px-3 py-1.5 text-sm text-muted-foreground">Page {page} of {totalPages}</span>
           <button
             type="button"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
-            className="px-3 py-1 rounded border border-border disabled:opacity-50"
+            className="px-3 py-1.5 rounded-md border border-border bg-surface-elevated hover:bg-muted disabled:opacity-50 text-sm"
           >
             Next
           </button>

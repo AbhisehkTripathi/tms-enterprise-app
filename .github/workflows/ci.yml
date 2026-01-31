@@ -33,7 +33,7 @@ jobs:
         run: npm install
 
       - name: Lint (Node apps)
-        run: npx nx run-many -t lint -p tms-api,tms-web --skip-nx-cache 2>/dev/null || true
+        run: npx nx run-many -t lint -p tms-api,tms-web --skip-nx-cache
 
       - name: Build tms-api
         run: npx nx run tms-api:build

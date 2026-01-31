@@ -1,6 +1,6 @@
 package com.tms.shipment.app.models;
 
-import jakarta.validation.constraints.*;
+import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Map;

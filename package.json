@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "TMS Enterprise App – Nx monorepo (tms-web, tms-api, shipment-service)",
+  "overrides": {
+    "@types/express": "4.17.21",
+    "@types/express-serve-static-core": "4.19.5"
+  },
   "scripts": {
     "build": "nx run-many -t build",
     "serve": "nx run-many -t serve --parallel=1",
@@ -24,5 +28,8 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "rxjs": "^7.8.2"
   }
 }

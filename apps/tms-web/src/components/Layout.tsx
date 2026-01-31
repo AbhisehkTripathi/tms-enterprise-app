@@ -38,7 +38,7 @@ export function Layout({ children, view = "grid", onViewChange }: LayoutProps): 
         <span className="block w-5 h-0.5 bg-primary-text" />
       </button>
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-10 w-56 bg-[hsl(var(--color-sidebar))] text-white transform transition-transform lg:translate-x-0 ${
+        className={`fixed lg:static inset-y-0 left-0 z-10 w-56 bg-[hsl(var(--color-sidebar))] border-r border-[hsl(var(--color-sidebar-border))] text-primary transform transition-transform lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -48,7 +48,7 @@ export function Layout({ children, view = "grid", onViewChange }: LayoutProps): 
               <Link
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
-                className="block px-3 py-2 rounded hover:bg-white/10"
+                className="block px-3 py-2 rounded hover:bg-muted text-primary-text"
               >
                 {item.label}
               </Link>
@@ -57,7 +57,7 @@ export function Layout({ children, view = "grid", onViewChange }: LayoutProps): 
                   key={sub.path}
                   to={sub.path}
                   onClick={() => setSidebarOpen(false)}
-                  className="block px-6 py-1.5 text-sm text-white/80 hover:bg-white/10 rounded"
+                  className="block px-6 py-1.5 text-sm text-muted-foreground hover:bg-muted hover:text-primary-text rounded"
                 >
                   {sub.label}
                 </Link>
@@ -99,7 +99,7 @@ export function Layout({ children, view = "grid", onViewChange }: LayoutProps): 
             {auth && (
               <>
                 <span className="text-sm text-muted-foreground">{auth.role}</span>
-                <button type="button" onClick={handleLogout} className="text-sm text-red-600 hover:underline">
+                <button type="button" onClick={handleLogout} className="text-sm text-accent hover:underline font-medium">
                   Logout
                 </button>
               </>

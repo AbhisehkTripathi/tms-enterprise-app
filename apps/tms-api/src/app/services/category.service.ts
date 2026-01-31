@@ -1,227 +1,151 @@
-import AppDataSource from '@config/mongoose';
-import Service from '@libs/service';
-import Response from '@libs/response';
-import Category from '@models/category.schema';
-// import User from '@models/user.schema';
-// import Post from '@models/post.schema';
-import SearchEngine from '@libs/meili.search';
-import { ObjectId } from 'mongodb';
-import moment from 'moment';
+import { v4 as uuid } from "uuid";
+import Response from "@libs/response";
+import type { ICategory, ICategoryCreate, ICategoryUpdate } from "@models/category.schema";
+import { CategoryStatus } from "@models/category.schema";
 
-export default class CategoryService extends Service {
-  private categoryModel: any;
-  private userModel: any;
-  private postModel: any;
-  private searchEngine: any;
-  constructor() {
-    super();
-    this.searchEngine = new SearchEngine()
-    this.categoryModel = Category;
-    // this.userModel = User;
-    // this.postModel = Post;
-  }
+const store: ICategory[] = [];
 
-  async count(): Promise<Response<any>> {
+export default class CategoryService {
+  async count(): Promise<Response<number>> {
     try {
-      const result = await this.categoryModel.countDocuments();
-      if (!result) {
-        return new Response<any>(true, 200, 'Record not available', result);
-      }
-      return new Response<any>(true, 200, 'Count operation successful', result);
-    } catch (error: any) {
-      return new Response<any>(false, 500, 'Internal Server Error', undefined, undefined, error.message);
+      const count = store.filter((r) => r.deletedAt == null).length;
+      return new Response(true, 200, "Count operation successful", count);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<number>;
     }
   }
 
-  async list(): Promise<Response<any>> {
+  async list(): Promise<Response<ICategory[]>> {
     try {
-      const result = await this.categoryModel.find();
-      if (!result) {
-        return new Response<any>(true, 200, 'Record not available', result);
-      }
-      return new Response<any>(true, 200, 'Read operation successful', result);
-    } catch (error: any) {
-      return new Response<any>(false, 500, 'Internal Server Error', undefined, undefined, error.message);
+      const list = store.filter((r) => r.deletedAt == null);
+      return new Response(true, 200, "Read operation successful", list);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<ICategory[]>;
     }
   }
 
-  async retrieve(pid: string): Promise<Response<any>> {
+  async retrieve(id: string): Promise<Response<ICategory | undefined>> {
     try {
-      const isValidObjectId = ObjectId.isValid(pid);
-      if (!isValidObjectId) {
-        return new Response<any>(false, 400, 'Invalid ObjectId', undefined);
-      }
-      const record = await this.categoryModel.findById(pid);
-      if (!record) {
-        return new Response<any>(true, 200, 'Record not available', record);
-      }
-      return new Response<any>(true, 200, 'Read operation successful', record);
-    } catch (error: any) {
-      return new Response<any>(false, 500, 'Internal Server Error', undefined, undefined, error.message);
+      const record = store.find((r) => r.id === id && r.deletedAt == null);
+      if (!record) return new Response(true, 200, "Record not available", undefined);
+      return new Response(true, 200, "Read operation successful", record);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<ICategory | undefined>;
     }
   }
 
-  async retrieveByCategory(name: string): Promise<any> {
+  async retrieveByCategory(name: string): Promise<ICategory | undefined> {
+    return store.find((r) => r.name === name && r.deletedAt == null);
+  }
+
+  async create(data: ICategoryCreate): Promise<Response<ICategory>> {
     try {
-      const records = await this.categoryModel.findOne({ name: name });
-      return records;
-    } catch (error: any) {
-      return error;
+      const now = new Date();
+      const record: ICategory = {
+        id: uuid(),
+        name: data.name,
+        description: data.description,
+        status: data.status ?? CategoryStatus.Active,
+        createdAt: now,
+        updatedAt: now,
+      };
+      store.push(record);
+      return new Response(true, 201, "Insert operation successful", record);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<ICategory>;
     }
   }
 
-  async create(data: any): Promise<Response<any>> {
+  async update(id: string, data: ICategoryUpdate): Promise<Response<ICategory>> {
     try {
-      const category = new Category();
-      category.name = data.name;
-      category.description =data.description;
-      category.status= data.status;
-      category.createdAt=moment().toDate();
-      category.updatedAt=moment().toDate();
-      await this.searchEngine.addDocuments('category', category);
-      const result = await category.save();
-      return new Response<any>(true, 201, 'Insert operation successful',result);
-      
-    } catch (error:any) {
-      return new Response<any>(false, 500, 'Internal Server Error', undefined, undefined, error.message);
+      const idx = store.findIndex((r) => r.id === id);
+      if (idx === -1) return new Response(true, 200, "Record not available", undefined as unknown as ICategory);
+      const existing = store[idx];
+      const updated: ICategory = {
+        ...existing,
+        ...(data.name != null && { name: data.name }),
+        ...(data.description != null && { description: data.description }),
+        ...(data.status != null && { status: data.status }),
+        updatedAt: new Date(),
+      };
+      store[idx] = updated;
+      return new Response(true, 200, "Update operation successful", updated);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<ICategory>;
     }
   }
 
-  async update(pid: string, data: any): Promise<Response<any>> {
+  async delete(id: string): Promise<Response<ICategory | undefined>> {
     try {
-      const isValidObjectId = ObjectId.isValid(pid);
-      if (!isValidObjectId) {
-        return new Response<any>(false, 400, 'Invalid ObjectId', undefined);
-      }
-      const category = await this.categoryModel.findById(pid);
-      if (!category) {
-        return new Response<any>(true, 200, 'Record not available', category);
-      }
-      if (data.name) {
-        category.name = data.name;
-      }
-      if (data.description) {
-        category.description = data.description;
-      }
-      if (data.status) {
-        category.status = data.status;
-      }
-      await this.searchEngine.updateIndex('category', category);
-      const result = await category.save();
-      
-      return new Response<any>(true, 200, 'Update operation successful', result);
-    } catch (error: any) {
-      return new Response<any>(false, 500, 'Internal Server Error', undefined, undefined, error.message);
+      const idx = store.findIndex((r) => r.id === id);
+      if (idx === -1) return new Response(true, 200, "Record not available", undefined);
+      const now = new Date();
+      store[idx] = { ...store[idx], deletedAt: now, updatedAt: now };
+      return new Response(true, 200, "Delete operation successful", store[idx]);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<ICategory | undefined>;
     }
   }
 
-  async delete(pid: string): Promise<Response<any>> {
+  async datatable(data: { page?: number; limit?: number; search?: string; sort?: string }): Promise<Response<{
+    records: ICategory[];
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
+    filterCount: number;
+  }>> {
     try {
-      const isValidObjectId = ObjectId.isValid(pid);
-      if (!isValidObjectId) {
-        return new Response<any>(false, 400, 'Invalid ObjectId', undefined);
+      let filtered = store.filter((r) => r.deletedAt == null);
+      if (data.search) {
+        const s = String(data.search).toLowerCase();
+        filtered = filtered.filter(
+          (r) => r.name.toLowerCase().includes(s) || r.description.toLowerCase().includes(s)
+        );
       }
-      const category = await this.categoryModel.findById(pid);
-      if (!category) {
-        return new Response<any>(true, 200, 'Record not available');
-      }
-      category.deletedAt = moment().toDate();
-      await this.searchEngine.deleteDocument('category', pid);
-      const result = await category.save();
-      return new Response<any>(true, 200, 'Delete operation successful', result);
-    } catch (error: any) {
-      return new Response<any>(false, 500, 'Internal Server Error', undefined, undefined, error.message);
-    }
-  }
-
-  async datatable(data: any): Promise<Response<any>> {
-    try {
-      let { page, limit, search, sort } = data;
-      let errorMessage = '';
-
-      if (page !== undefined && limit !== undefined) {
-        if (isNaN(page) || !Number.isInteger(Number(page)) || isNaN(limit) || !Number.isInteger(Number(limit))) {
-          errorMessage = "Both 'page' and 'limit' must be integers.";
-        }
-      } else if (page !== undefined) {
-        if (isNaN(page) || !Number.isInteger(Number(page))) {
-          errorMessage = "'page' must be an integer.";
-        }
-      } else if (limit !== undefined) {
-        if (isNaN(limit) || !Number.isInteger(Number(limit))) {
-          errorMessage = "'limit' must be an integer.";
-        }
-      }
-
-      if (errorMessage) {
-        return new Response<any>(false, 400, errorMessage);
-      }
-
-      let searchQuery = {};
-      if (search !== undefined) {
-        searchQuery = {
-          $or: [
-            { name: { $regex: search, $options: 'i' } },
-            { description: { $regex: search, $options: 'i' } },
-          ],
-        };
-      }
-
-      let sortQuery = {};
-      if (sort !== undefined) {
-        const sortParams = sort.split(':');
-        if (sortParams.length === 2) {
-          const [column, order] = sortParams;
-          sortQuery = { [column]: order === 'desc' ? -1 : 1 };
-        }
-      }
-
-      page = page === undefined ? 1 : parseInt(page);
-      limit = limit === undefined ? 10 : parseInt(limit);
+      const [sortBy, order] = (data.sort ?? "createdAt:desc").split(":");
+      filtered.sort((a, b) => {
+        const aVal = (a as unknown as Record<string, unknown>)[sortBy];
+        const bVal = (b as unknown as Record<string, unknown>)[sortBy];
+        if (aVal instanceof Date && bVal instanceof Date)
+          return order === "desc" ? bVal.getTime() - aVal.getTime() : aVal.getTime() - bVal.getTime();
+        return String(aVal).localeCompare(String(bVal), undefined, { numeric: true }) * (order === "desc" ? -1 : 1);
+      });
+      const page = Math.max(1, Number(data.page) || 1);
+      const limit = Math.min(100, Math.max(1, Number(data.limit) || 10));
+      const totalCount = filtered.length;
+      const totalPages = Math.ceil(totalCount / limit) || 1;
       const skip = (page - 1) * limit;
-      const [records, totalCount] = await Promise.all([
-        this.categoryModel.find()
-          .select({ 
-            "name": 1,
-            "description":1,
-            "status":1,
-           "_id": 0
-          })
-          .where(searchQuery)
-          .sort(sortQuery)
-          .skip(skip)
-          .limit(limit),
-        this.categoryModel.countDocuments(searchQuery),
-      ]);
-      console.log(records, totalCount)
-      if (records.length === 0) {
-        return new Response<any>(true, 200, 'No records available', {});
-      }
-
-      const totalPages = Math.ceil(totalCount / limit);
-      const currentPage = page;
-      const output = {
-        records: records,
-        totalPages: totalPages !== null ? totalPages : 0,
-        currentPage: currentPage !== null ? currentPage : 0,
-        filterCount: records.length,
-        totalCount: totalCount,
-      };
-      return new Response<any>(true, 200, 'Read operation successful', output);
-    } catch (error: any) {
-      return new Response<any>(false, 500, 'Internal Server Error', undefined, undefined, error.message);
+      const records = filtered.slice(skip, skip + limit);
+      const output = { records, totalCount, totalPages, currentPage: page, filterCount: records.length };
+      return new Response(true, 200, "Read operation successful", output);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<{
+        records: ICategory[];
+        totalCount: number;
+        totalPages: number;
+        currentPage: number;
+        filterCount: number;
+      }>;
     }
   }
-  async searchCategorys(query: any): Promise<Response<any>> {
+
+  async searchCategorys(query: string): Promise<Response<ICategory[]>> {
     try {
-      const searchOptions = {
-        filters: `name:${query}*`, // Specify the filter to search in the "name" column with a partial match
-        attributesToRetrieve: ['name'], // Specify the column(s) to retrieve in the search results
-      };
-      const result = await this.searchEngine.search('category', query, searchOptions);
-      return new Response<any>(true, 200, 'Search engine operation successful', result);
-    } catch (error: any) {
-      return new Response<any>(false, 500, 'Search engine server error', undefined, undefined, error.message);
+      const q = String(query).toLowerCase();
+      const list = store.filter(
+        (r) => r.deletedAt == null && (r.name.toLowerCase().includes(q) || r.description.toLowerCase().includes(q))
+      );
+      return new Response(true, 200, "Search operation successful", list);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Internal Server Error";
+      return new Response(false, 500, "Internal Server Error", undefined, undefined, message) as unknown as Response<ICategory[]>;
     }
   }
 }

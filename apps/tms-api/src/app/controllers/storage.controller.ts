@@ -22,16 +22,20 @@ static async getStorage(req: Request, res: Response) {
   res.status(records.statusCode).json(records);
 }
 static async getStorageByFilename(req: Request, res: Response) {
-  let fileName = req.params.fileName
-  let storageService=new StorageService();
-  const records = await storageService.retrieveByFilename(fileName)
-  res.status(records.statusCode).json(records);
+  const fileName = req.params.fileName;
+  const storageService = new StorageService();
+  const list = await storageService.list();
+  const record = list.data?.find((s) => s.name === fileName);
+  res.status(list.statusCode).json(list.success ? { ...list, data: record } : list);
 }
 
 static async upload(req: Request, res: Response) {
-    const file=req.file
-    let storageService=new StorageService();
-    const result = await storageService.create(file,'document')
+    const file = req.file;
+    const storageService = new StorageService();
+    const data = file
+      ? { name: file.originalname ?? "", path: `document/${file.originalname ?? ""}` }
+      : (req.body as { name: string; path: string });
+    const result = await storageService.create(data);
     res.status(result.statusCode).json(result);
 }
 
@@ -42,17 +46,17 @@ static async delete(req: Request, res: Response)  {
     res.status(result.statusCode).json(result);
 }
 
-static  async update(req: Request, res: Response) {
+static async update(req: Request, res: Response) {
     const id = req.params.id;
-    const file=req.file
-    let storageService=new StorageService();
-    const result = await storageService.update(id,file)
+    const data = req.body as { name?: string; path?: string };
+    const storageService = new StorageService();
+    const result = await storageService.update(id, data);
     res.status(result.statusCode).json(result);
   }
 
-static  async datatable(req: Request, res: Response) {
-    let storageService=new StorageService();
-    const records = await storageService.datatable()
+static async datatable(req: Request, res: Response) {
+    const storageService = new StorageService();
+    const records = await storageService.datatable(req.query as { page?: number; limit?: number });
     res.status(records.statusCode).json(records);
   }
 }

@@ -54,8 +54,8 @@ static  async datatable(req: Request, res: Response) {
   }
 
     static async search(req: Request, res: Response) {
-    const query = req.query.q;
-    let categoryService=new CategoryService();
+    const query = typeof req.query.q === "string" ? req.query.q : "";
+    const categoryService = new CategoryService();
     const results = await categoryService.searchCategorys(query);
     res.status(results.statusCode).json(results);
      
