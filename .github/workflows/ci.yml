@@ -23,14 +23,11 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
-          java-version: "17"
+          java-version: "11"
           cache: "maven"
 
-      - name: Install root dependencies
+      - name: Install dependencies
         run: npm ci
-
-      - name: Install workspace dependencies
-        run: npm install
 
       - name: Lint (Node apps)
         run: npx nx run-many -t lint -p tms-api,tms-web --skip-nx-cache
@@ -42,7 +39,7 @@ jobs:
         run: npx nx run tms-web:build
 
       - name: Test tms-api
-        run: npx nx run tms-api:test --skip-nx-cache 2>/dev/null || true
+        run: npx nx run tms-api:test --skip-nx-cache
 
       - name: Build shipment-service
         run: npx nx run shipment-service:build
