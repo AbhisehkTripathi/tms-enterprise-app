@@ -91,17 +91,14 @@ app.use(errorHandler);
 const startServer = async (): Promise<void> => {
   try {
     const { runShipmentSeed } = await import("./seed/run-seed");
-    const result = await runShipmentSeed();
-    if (result.seeded > 0) {
-      console.log(`Seeded ${result.seeded} sample shipments (grid, tile, report).`);
-    }
+    await runShipmentSeed();
   } catch (err) {
     console.error("Seed failed (optional):", err instanceof Error ? err.message : err);
   }
-  app.listen(process.env.APP_PORT, () => {
-    console.log(
-      `Server started at http://${process.env.APP_HOST}:${process.env.APP_PORT}`
-    );
+  const port = process.env.PORT ?? process.env.APP_PORT ?? 3010;
+  const host = process.env.APP_HOST ?? "0.0.0.0";
+  app.listen(port, () => {
+    console.log(`Server started at http://${host}:${port}`);
   });
 };
 

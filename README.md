@@ -332,6 +332,15 @@ docker build -f apps/shipment-service/Dockerfile -t shipment-service apps/shipme
 
 Result: the Vercel URL serves the React app; the app calls your hosted tms-api for GraphQL.
 
+### Node API (Render / Docker) – in-memory data and seeding
+
+When you deploy **tms-api** alone (e.g. on Render or via Docker **without** the Java shipment-service):
+
+- **Do not set** `SPRING_BOOT_SHIPMENT_URL`. If it is unset, the API uses **in-memory** shipment data and **runs the seed on startup** (sample shipments + seeded users). Data will be visible in the frontend.
+- If you **do set** `SPRING_BOOT_SHIPMENT_URL` (e.g. to a Java service URL), shipment seed is **skipped** and shipment data comes only from the Java service. If that service is empty or not deployed, the shipment list will be empty. Users are always in-memory in tms-api.
+
+**Render:** Set `PORT` if required (Render often sets it automatically). Leave `SPRING_BOOT_SHIPMENT_URL` unset for in-memory + auto-seed. Check the service logs for messages like `Seeded N sample shipments` or `Shipment seed skipped (SPRING_BOOT_SHIPMENT_URL is set)`.
+
 ---
 
 ## Renames and paths

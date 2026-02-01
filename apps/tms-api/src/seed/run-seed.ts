@@ -8,6 +8,7 @@ import { SAMPLE_SHIPMENTS } from "./shipment.seed";
  */
 export async function runShipmentSeed(): Promise<{ seeded: number; skipped: boolean }> {
   if (isSpringBootEnabled()) {
+    console.log("Shipment seed skipped (SPRING_BOOT_SHIPMENT_URL is set; data from Java service).");
     return { seeded: 0, skipped: true };
   }
 
@@ -16,6 +17,7 @@ export async function runShipmentSeed(): Promise<{ seeded: number; skipped: bool
   const count = countRes.data ?? 0;
 
   if (count > 0) {
+    console.log(`Shipment seed skipped (already ${count} shipment(s) in store).`);
     return { seeded: 0, skipped: true };
   }
 
@@ -25,5 +27,6 @@ export async function runShipmentSeed(): Promise<{ seeded: number; skipped: bool
     if (res.success) seeded += 1;
   }
 
+  console.log(`Seeded ${seeded} sample shipments (in-memory; grid/tile/report).`);
   return { seeded, skipped: false };
 }
