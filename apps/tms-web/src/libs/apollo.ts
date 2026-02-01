@@ -2,8 +2,10 @@ import { ApolloClient, InMemoryCache, HttpLink, from } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { getAuth } from "./auth";
 
+const productionApiBase = "https://tms-enterprise-app-node-api.onrender.com";
 const graphqlUri =
-  import.meta.env.VITE_GRAPHQL_URI ?? "http://localhost:3010/api/v1/user";
+  import.meta.env.VITE_GRAPHQL_URI ??
+  (import.meta.env.PROD ? `${productionApiBase}/api/v1/user` : "http://localhost:3010/api/v1/user");
 
 const authLink = setContext((_, { headers }) => {
   const auth = getAuth();
