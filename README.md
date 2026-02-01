@@ -332,6 +332,20 @@ docker build -f apps/shipment-service/Dockerfile -t shipment-service apps/shipme
 
 Result: the Vercel URL serves the React app; the app calls your hosted tms-api for GraphQL.
 
+### Cloudflare Pages (frontend only)
+
+**tms-web** can be deployed to [Cloudflare Pages](https://pages.cloudflare.com). The repo uses **npm** only (no `yarn.lock`); Cloudflare will run `npm install` when only `package-lock.json` is present.
+
+1. **Connect the repo** in Cloudflare Pages (Dashboard → Pages → Create project → Connect to Git).
+2. **Build settings:**
+   - **Root directory:** `apps/tms-web` (so install and build run in the app folder with npm).
+   - **Build command:** `npm ci && npm run build`.
+   - **Build output directory:** `dist`.
+3. **Environment variable:** add `VITE_GRAPHQL_URI` = your tms-api URL, e.g. `https://tms-enterprise-app-node-api.onrender.com/api/v1/user`.
+4. Deploy; set **CORS** on tms-api to allow your Cloudflare Pages origin (e.g. `https://your-project.pages.dev`).
+
+If you build from **repo root** instead: Root directory = (empty), Build command = `npm ci && cd apps/tms-web && npm run build`, Build output directory = `apps/tms-web/dist`.
+
 ### Node API (Render / Docker) – in-memory data and seeding
 
 When you deploy **tms-api** alone (e.g. on Render or via Docker **without** the Java shipment-service):
