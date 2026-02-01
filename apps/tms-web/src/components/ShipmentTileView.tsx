@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client/react";
 import { gql } from "graphql-tag";
-import { formatDate, formatRate } from "@/utils/format";
+import { formatDate } from "@/utils/format";
 import { getAuth } from "@/libs/auth";
 import { getFlaggedShipmentIds, toggleFlaggedShipmentId } from "@/libs/flaggedShipments";
 
