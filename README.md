@@ -341,6 +341,25 @@ When you deploy **tms-api** alone (e.g. on Render or via Docker **without** the 
 
 **Render:** Set `PORT` if required (Render often sets it automatically). Leave `SPRING_BOOT_SHIPMENT_URL` unset for in-memory + auto-seed. Check the service logs for messages like `Seeded N sample shipments` or `Shipment seed skipped (SPRING_BOOT_SHIPMENT_URL is set)`.
 
+### Using the Java shipment-service in production
+
+To **use the Java service** (shipment data from Java, not in-memory in Node):
+
+1. **Deploy shipment-service** (e.g. on Render):
+   - Create a **Web Service**, connect the same repo.
+   - **Root Directory:** leave empty (repo root) or set so the Dockerfile path is correct.
+   - **Docker:** use **Dockerfile path** `apps/shipment-service/Dockerfile` and **Docker context** `apps/shipment-service` (or build from root with context `./apps/shipment-service`).
+   - Expose port **8082** (or set `PORT` / `SERVER_PORT` if the platform uses another port).
+   - After deploy, note the service URL (e.g. `https://tms-shipment-service.onrender.com`).
+
+2. **Configure tms-api** to use the Java service:
+   - In tms-api (Render): set **`SPRING_BOOT_SHIPMENT_URL`** = Java service URL **without** trailing slash, e.g. `https://tms-shipment-service.onrender.com`.
+   - Redeploy tms-api.
+
+3. **Data:** The Java service seeds **10 sample shipments** on startup when the DB is empty (H2 in-memory by default). Users remain in-memory in tms-api. The frontend will show shipments from the Java service.
+
+**Summary:** Deploy shipment-service → set `SPRING_BOOT_SHIPMENT_URL` in tms-api → both services are used; Java owns shipment data and seeds on first run.
+
 ---
 
 ## Renames and paths
