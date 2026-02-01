@@ -41,6 +41,14 @@
         "command": "npm run lint",
         "cwd": "{projectRoot}"
       }
+    },
+    "seed-api": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm run seed:api",
+        "cwd": "{projectRoot}"
+      },
+      "description": "Seed sample shipments via GraphQL (server must be running)"
     }
   },
   "tags": ["scope:api", "type:app"]

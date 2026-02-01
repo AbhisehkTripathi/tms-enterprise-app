@@ -1,0 +1,32 @@
+services:
+  shipment-service:
+    build:
+      context: ./apps/shipment-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+
+  tms-api:
+    build:
+      context: ./apps/tms-api
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      APP_HOST: 0.0.0.0
+      APP_PORT: 3010
+      SPRING_BOOT_SHIPMENT_URL: http://shipment-service:8082
+    ports:
+      - "3010:3010"
+    depends_on:
+      - shipment-service
+
+  tms-web:
+    build:
+      context: ./apps/tms-web
+      dockerfile: Dockerfile
+      args:
+        VITE_GRAPHQL_URI: http://localhost:3010/api/v1/user
+    ports:
+      - "5173:80"
+    depends_on:
+      - tms-api

@@ -122,4 +122,11 @@ export class ShipmentResolver {
     if (!result.success || !result.data) throw new Error(result.message ?? "Update failed");
     return toShipment(result.data);
   }
+
+  @Mutation(() => Boolean)
+  @Authorized("admin")
+  async deleteShipment(@Arg("id", () => String) id: string): Promise<boolean> {
+    const result = await shipmentService.delete(id);
+    return result.success;
+  }
 }

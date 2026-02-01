@@ -37,9 +37,15 @@ import { errorHandler, notFound } from "@libs/error.handler";
 
 const app: Application = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    allowedHeaders: ["Content-Type", "x-role", "x-user-id"],
+    exposedHeaders: ["x-role", "x-user-id"],
+  })
+);
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "1mb" }));
 
 morgan.token("user-type", (req: Request, res: Response) => {
   return req.headers["user-type"] as string;
@@ -81,9 +87,17 @@ app.get("/", (req: Request, res: Response) => {
 app.use(notFound);
 app.use(errorHandler);
 
-// Handle connection events
-
-const startServer = () => {
+// Seed sample shipments (in-memory only, when empty) before server start so grid/tile/report have data.
+const startServer = async (): Promise<void> => {
+  try {
+    const { runShipmentSeed } = await import("./seed/run-seed");
+    const result = await runShipmentSeed();
+    if (result.seeded > 0) {
+      console.log(`Seeded ${result.seeded} sample shipments (grid, tile, report).`);
+    }
+  } catch (err) {
+    console.error("Seed failed (optional):", err instanceof Error ? err.message : err);
+  }
   app.listen(process.env.APP_PORT, () => {
     console.log(
       `Server started at http://${process.env.APP_HOST}:${process.env.APP_PORT}`
@@ -92,7 +106,7 @@ const startServer = () => {
 };
 
 AppDataSource.initialize()
-  .then(startServer)
+  .then(() => startServer())
   .catch((err: Error) => {
     console.error("Data Source init failed (optional, in-memory data used):", err.message);
     startServer();

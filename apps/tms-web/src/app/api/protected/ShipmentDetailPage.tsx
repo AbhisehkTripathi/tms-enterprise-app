@@ -1,8 +1,11 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@apollo/client/react";
+import { useState } from "react";
+import { useParams, useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "graphql-tag";
 import { formatDate, formatRate } from "@/utils/format";
 import { Layout } from "@/components/Layout";
+import { getAuth } from "@/libs/auth";
+import { isShipmentFlagged, toggleFlaggedShipmentId } from "@/libs/flaggedShipments";
 
 const SHIPMENT_BY_ID = gql`
   query Shipment($id: String!) {
@@ -22,9 +25,33 @@ const SHIPMENT_BY_ID = gql`
   }
 `;
 
+const DELETE_SHIPMENT = gql`
+  mutation DeleteShipment($id: String!) {
+    deleteShipment(id: $id)
+  }
+`;
+
 export function ShipmentDetailPage(): React.ReactElement {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const backView = searchParams.get("view");
+  const backPath = backView === "tile" ? "/shipments?view=tile" : "/shipments";
+  const auth = getAuth();
+  const isAdmin = auth?.role === "admin";
+  const shipmentId = id ?? "";
+  const [flagged, setFlagged] = useState(() => isShipmentFlagged(shipmentId));
+
+  const handleToggleFlag = (): void => {
+    toggleFlaggedShipmentId(shipmentId);
+    setFlagged(isShipmentFlagged(shipmentId));
+  };
+
+  const [deleteShipment] = useMutation<{ deleteShipment: boolean }>(DELETE_SHIPMENT, {
+    refetchQueries: ["ShipmentsPaginated"],
+    onCompleted: () => navigate(backPath),
+  });
+
   const { data, loading, error } = useQuery<{
     shipment: {
       id: string;
@@ -39,20 +66,48 @@ export function ShipmentDetailPage(): React.ReactElement {
       createdAt: string;
       updatedAt: string;
     } | null;
-  }>(SHIPMENT_BY_ID, { variables: { id: id ?? "" }, skip: !id });
+  }>(SHIPMENT_BY_ID, { variables: { id: shipmentId }, skip: !id });
 
   const s = data?.shipment;
 
   return (
     <Layout>
       <div className="max-w-2xl mx-auto p-6 bg-surface-elevated border border-border rounded-lg shadow-sm">
-        <button
-          type="button"
-          onClick={() => navigate("/shipments")}
-          className="mb-4 text-sm text-accent hover:underline font-medium"
-        >
-          ← Back to shipments
-        </button>
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <button
+            type="button"
+            onClick={() => navigate(backPath)}
+            className="text-sm text-accent hover:underline font-medium"
+          >
+            ← Back to {backView === "tile" ? "tile view" : "shipments"}
+          </button>
+          {isAdmin && s && (
+            <>
+              <Link
+                to={`/shipments/${shipmentId}/edit?view=${backView ?? ""}`}
+                className="text-sm text-accent hover:underline font-medium"
+              >
+                Edit
+              </Link>
+              <button
+                type="button"
+                onClick={() => deleteShipment({ variables: { id: shipmentId } })}
+                className="text-sm text-red-600 hover:underline font-medium"
+              >
+                Delete
+              </button>
+            </>
+          )}
+          {s && (
+            <button
+              type="button"
+              onClick={handleToggleFlag}
+              className="text-sm text-accent hover:underline font-medium"
+            >
+              {flagged ? "Unflag" : "Flag"}
+            </button>
+          )}
+        </div>
         {loading && <p className="text-muted-foreground">Loading…</p>}
         {error && <p className="text-red-600">Error: {error.message}</p>}
         {!loading && !error && s && (

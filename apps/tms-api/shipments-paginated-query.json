@@ -1,0 +1,5 @@
+{
+  "operationName": "ShipmentsPaginated",
+  "variables": { "page": 1, "pageSize": 10 },
+  "query": "query ShipmentsPaginated($page: Int!, $pageSize: Int!) { shipmentsPaginated(page: $page, pageSize: $pageSize) { items { id shipperName carrierName pickupLocation deliveryLocation trackingNumber status rate createdAt updatedAt } totalCount page pageSize totalPages } }"
+}

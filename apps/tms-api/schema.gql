@@ -31,6 +31,7 @@ type Mutation {
   createUser(input: UserInput!): User!
   deleteCategory(id: String!): Boolean!
   deleteRole(id: String!): Boolean!
+  deleteShipment(id: String!): Boolean!
   deleteStorage(id: String!): Boolean!
   updateCategory(id: String!, input: CategoryInput!): Category!
   updateRole(id: String!, input: RoleInput!): Role!
@@ -118,9 +119,11 @@ type User {
   email: String!
   id: Float!
   name: String!
+  role: String!
 }
 
 input UserInput {
   email: String!
   name: String!
+  role: String!
 }

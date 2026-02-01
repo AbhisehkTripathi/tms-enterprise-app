@@ -4,7 +4,10 @@ import { apolloClient } from "@/libs/apollo";
 import { ProtectedRoute } from "@/app/api/protected/ProtectedRoute";
 import { ShipmentsPage } from "@/app/api/protected/ShipmentsPage";
 import { ShipmentDetailPage } from "@/app/api/protected/ShipmentDetailPage";
+import { ShipmentEditPage } from "@/app/api/protected/ShipmentEditPage";
+import { ReportsPage } from "@/app/api/protected/ReportsPage";
 import { LoginPage } from "@/app/LoginPage";
+import { LoginDemoPage } from "@/app/LoginDemoPage";
 import { HomePage } from "@/app/HomePage";
 
 function App(): React.ReactElement {
@@ -13,6 +16,7 @@ function App(): React.ReactElement {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/login/demo" element={<LoginDemoPage />} />
           <Route path="/" element={<HomePage />} />
           <Route
             path="/shipments"
@@ -30,7 +34,15 @@ function App(): React.ReactElement {
               </ProtectedRoute>
             }
           />
-          <Route path="/reports" element={<ProtectedRoute><div className="p-4">Reports (placeholder)</div></ProtectedRoute>} />
+          <Route
+            path="/shipments/:id/edit"
+            element={
+              <ProtectedRoute>
+                <ShipmentEditPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

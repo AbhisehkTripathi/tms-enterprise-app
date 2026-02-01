@@ -14,7 +14,8 @@
     "migration:generate": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:generate -d ./src/database/AppDataSource.ts",
     "migration:up": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:run -d ./src/database/AppDataSource.ts",
     "migration:down": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm migration:revert -d ./src/database/AppDataSource.ts",
-    "seeder": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm-seeding seed -d ./src/config/database.ts ./src/database/seeders/*.ts"
+    "seeder": "./node_modules/.bin/ts-node ./node_modules/.bin/typeorm-seeding seed -d ./src/config/database.ts ./src/database/seeders/*.ts",
+    "seed:api": "ts-node -r tsconfig-paths/register scripts/seed-via-api.ts"
   },
   "author": "",
   "license": "ISC",

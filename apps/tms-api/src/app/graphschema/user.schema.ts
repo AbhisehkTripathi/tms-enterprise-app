@@ -11,17 +11,23 @@ export class User {
   name!: string
 
   @Field()
-  @IsEmail() 
+  @IsEmail()
   email!: string
+
+  @Field()
+  role!: "admin" | "employee"
 }
 
 @InputType()
-export class UserInput implements Pick<User, "name" | "email"> {
+export class UserInput implements Pick<User, "name" | "email" | "role"> {
   @Field()
   @Length(1, 255)
   name!: string
 
   @Field()
-  @IsEmail() 
+  @IsEmail()
   email!: string
+
+  @Field()
+  role!: "admin" | "employee"
 }

@@ -46,3 +46,18 @@ jobs:
 
       - name: Test shipment-service
         run: npx nx run shipment-service:test
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build tms-web image
+        run: docker build -f apps/tms-web/Dockerfile -t tms-web apps/tms-web
+
+      - name: Build tms-api image
+        run: docker build -f apps/tms-api/Dockerfile -t tms-api apps/tms-api
+
+      - name: Build shipment-service image
+        run: docker build -f apps/shipment-service/Dockerfile -t shipment-service apps/shipment-service

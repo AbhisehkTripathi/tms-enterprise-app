@@ -11,6 +11,7 @@ interface ShipmentRow {
   status: string;
   rate: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 interface ShipmentGridProps {
@@ -29,6 +30,7 @@ const COLUMNS = [
   "Status",
   "Rate",
   "Created",
+  "Updated",
   "Actions",
 ] as const;
 
@@ -56,6 +58,7 @@ export function ShipmentGrid({ shipments, totalPages, page, onPageChange }: Ship
               <td className="px-4 py-2 text-sm">{s.status}</td>
               <td className="px-4 py-2 text-sm">{formatRate(s.rate)}</td>
               <td className="px-4 py-2 text-sm">{formatDate(s.createdAt)}</td>
+              <td className="px-4 py-2 text-sm">{formatDate(s.updatedAt)}</td>
               <td className="px-4 py-2">
                 <Link to={`/shipments/${s.id}`} className="text-accent hover:underline text-sm font-medium">
                   View

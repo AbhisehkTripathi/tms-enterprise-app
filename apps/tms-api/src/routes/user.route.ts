@@ -1,44 +1,9 @@
 import express from "express";
-import { buildSchema } from "type-graphql";
-import { graphqlHTTP } from "express-graphql";
-import { UsersResolver } from "@services/user.service";
-import { ShipmentResolver } from "@services/shipment.resolver";
-import { RoleResolver } from "@services/role.resolver";
-import { CategoryResolver } from "@services/category.resolver";
-import { StorageResolver } from "@services/storage.resolver";
-import { authChecker } from "@config/auth";
-import type { GraphQLContext } from "@config/auth";
+import { createGraphQLHandler } from "@config/graphql";
 
 const route = express.Router();
 
-const getSchema = async () => {
-  return buildSchema({
-    resolvers: [
-      UsersResolver,
-      ShipmentResolver,
-      RoleResolver,
-      CategoryResolver,
-      StorageResolver,
-    ],
-    emitSchemaFile: true,
-    authChecker,
-  });
-};
-
-route.use(
-  "/",
-  graphqlHTTP(async (req, _res, _params) => {
-    const r = req as express.Request;
-    return {
-      schema: await getSchema(),
-      context: (): GraphQLContext => ({
-        userId: r.headers["x-user-id"] as string | undefined,
-        role: (r.headers["x-role"] as "admin" | "employee") || "employee",
-      }),
-      graphiql: process.env.NODE_ENV === "development",
-    };
-  })
-);
+route.use("/", createGraphQLHandler());
 
 export default route;
    

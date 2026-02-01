@@ -91,7 +91,7 @@ tms-web (React)  →  GraphQL  →  tms-api (Node.js)  →  REST  →  shipment-
 |--------|----------|--------|
 | **tms-api** | **In-memory** (default) | Users, roles, categories, storage, shipments are held in memory. No DB required to run. |
 | **tms-api** | **PostgreSQL** (optional) | TypeORM is configured in `database.ts`; with `entities: []` the app does not persist to Postgres. Add entities and set `DB_*` in env to use Postgres. |
-| **shipment-service** | **H2 in-memory** (default) | `jdbc:h2:mem:shipments`. Data is lost on restart. H2 console: http://localhost:8081/h2-console when running. |
+| **shipment-service** | **H2 in-memory** (default) | `jdbc:h2:mem:shipments`. Data is lost on restart. H2 console: http://localhost:8082/h2-console when running. |
 | **shipment-service** | **PostgreSQL** (optional) | Override `spring.datasource.*` in `application.yml` (or profile) to point to Postgres for persistent shipments. |
 
 ---
@@ -105,9 +105,9 @@ Use these so the apps can talk to each other when running locally or in one envi
 | **tms-web** | `apps/tms-web/.env` | `VITE_GRAPHQL_URI` | `http://localhost:3010/api/v1/user` | GraphQL endpoint (tms-api). Default in code is 3010; set only if tms-api runs elsewhere. |
 | **tms-api** | `apps/tms-api/.env.development` | `APP_HOST` | `0.0.0.0` | Bind address. |
 | **tms-api** | `apps/tms-api/.env.development` | `APP_PORT` | `3010` | Port for GraphQL and REST. tms-web expects this by default. |
-| **tms-api** | `apps/tms-api/.env.development` | `SPRING_BOOT_SHIPMENT_URL` | `http://localhost:8081` | Optional. When set, tms-api delegates shipment CRUD to shipment-service. |
+| **tms-api** | `apps/tms-api/.env.development` | `SPRING_BOOT_SHIPMENT_URL` | `http://localhost:8082` | Optional. When set, tms-api delegates shipment CRUD to shipment-service. |
 
-**shipment-service** has no env for calling other services; it is the backend. Port is in `apps/shipment-service/src/main/resources/application.yml` (`server.port: 8081`).
+**shipment-service** has no env for calling other services; it is the backend. Port is in `apps/shipment-service/src/main/resources/application.yml` (`server.port: 8082`).
 
 **Copy examples:**  
 - tms-api: `cp apps/tms-api/.env.example apps/tms-api/.env.development` (then edit).  
@@ -118,18 +118,18 @@ Use these so the apps can talk to each other when running locally or in one envi
 ## How tms-api and shipment-service (Java backend) interact
 
 - **tms-api** is the API layer the frontend talks to: it exposes **GraphQL** (`/api/v1/user`) and **REST** (`/api/v1/shipment`, etc.). It does **not** store shipment data itself when the Java backend is used.
-- **shipment-service** (Java/Spring Boot) is the **backend** that owns shipment persistence (H2 or Postgres). It exposes **REST only**: `GET/POST/PATCH/DELETE /api/shipments` on port **8081**.
+- **shipment-service** (Java/Spring Boot) is the **backend** that owns shipment persistence (H2 or Postgres). It exposes **REST only**: `GET/POST/PATCH/DELETE /api/shipments` on port **8082**.
 
 **Interaction:**
 
 1. **Frontend** calls **tms-api** (GraphQL or REST) for shipments.
 2. **tms-api** checks `SPRING_BOOT_SHIPMENT_URL`:
-   - **If set** (e.g. `http://localhost:8081`): tms-api **calls the Java service over HTTP** for every shipment operation.  
-     - List → `GET http://localhost:8081/api/shipments?page=...&size=...&sortBy=...`  
-     - Get one → `GET http://localhost:8081/api/shipments/{id}`  
-     - Create → `POST http://localhost:8081/api/shipments`  
-     - Update → `PATCH http://localhost:8081/api/shipments/{id}`  
-     - Delete → `DELETE http://localhost:8081/api/shipments/{id}`  
+   - **If set** (e.g. `http://localhost:8082`): tms-api **calls the Java service over HTTP** for every shipment operation.  
+     - List → `GET http://localhost:8082/api/shipments?page=...&size=...&sortBy=...`  
+     - Get one → `GET http://localhost:8082/api/shipments/{id}`  
+     - Create → `POST http://localhost:8082/api/shipments`  
+     - Update → `PATCH http://localhost:8082/api/shipments/{id}`  
+     - Delete → `DELETE http://localhost:8082/api/shipments/{id}`  
      The logic lives in `apps/tms-api/src/libs/shipmentClient.ts` (axios); `ShipmentService` in `apps/tms-api/src/app/services/shipment.service.ts` uses it when the env is set.
    - **If not set**: tms-api uses **in-memory** shipment data (no Java service involved).
 
@@ -168,7 +168,7 @@ npx nx run tms-api:serve
 # React frontend (default port 5173)
 npx nx run tms-web:serve
 
-# Spring Boot Shipment Service (port 8081)
+# Spring Boot Shipment Service (port 8082)
 npx nx run shipment-service:serve
 ```
 
@@ -206,8 +206,8 @@ npm run test
    npx nx run shipment-service:serve
    ```
 
-   - REST API: http://localhost:8081/api/shipments  
-   - H2 console: http://localhost:8081/h2-console  
+   - REST API: http://localhost:8082/api/shipments  
+   - H2 console: http://localhost:8082/h2-console  
    - Database: H2 in-memory (see [Databases](#databases)).
 
 2. **Start tms-api**
@@ -219,7 +219,7 @@ npm run test
    - GraphQL: http://localhost:3010/api/v1/user (headers: `x-role: employee` or `x-role: admin`)
    - REST: http://localhost:3010/api/v1/shipment (and role/category/storage)
    - Port from `apps/tms-api/.env.development` (default 3010).  
-   - To use shipment-service: set `SPRING_BOOT_SHIPMENT_URL=http://localhost:8081` in `.env.development` (see [Environment variables](#environment-variables-inter-service)).
+   - To use shipment-service: set `SPRING_BOOT_SHIPMENT_URL=http://localhost:8082` in `.env.development` (see [Environment variables](#environment-variables-inter-service)).
 
 3. **Start tms-web**
 
@@ -230,7 +230,36 @@ npm run test
    - App: http://localhost:5173  
    - Uses tms-api at `http://localhost:3010/api/v1/user` by default; override with `VITE_GRAPHQL_URI` in `apps/tms-web/.env` if needed.
 
-**Flow:** Open app → Login (Employee/Admin) → Shipments (grid/tile) → View details. Data comes from tms-api (in-memory, or via shipment-service when `SPRING_BOOT_SHIPMENT_URL` is set).
+**Flow:** Open app → Login (email + password or demo account) → Shipments (grid/tile) → View details. Data comes from tms-api (in-memory, or via shipment-service when `SPRING_BOOT_SHIPMENT_URL` is set).
+
+---
+
+## Login credentials
+
+The app supports **product-style login** (email + password) and a **demo account** flow.
+
+### Product login (`/login`)
+
+- **Password for all seeded accounts:** `demo`
+- Use any seeded email below with password **`demo`** to sign in.
+
+### Seeded users (2 admins, 5 employees)
+
+| Role     | Email             | Password |
+|----------|-------------------|----------|
+| Admin    | `admin1@tms.demo` | `demo`   |
+| Admin    | `admin2@tms.demo` | `demo`   |
+| Employee | `emp1@tms.demo`   | `demo`   |
+| Employee | `emp2@tms.demo`   | `demo`   |
+| Employee | `emp3@tms.demo`   | `demo`   |
+| Employee | `emp4@tms.demo`   | `demo`   |
+| Employee | `emp5@tms.demo`   | `demo`   |
+
+### Demo login (`/login/demo`)
+
+- Link from main login: **"Use demo account"** → `/login/demo`.
+- Pick a user from the list (2 admins, 5 employees); no password required.
+- **Back to sign in** returns to `/login`.
 
 ---
 
@@ -259,6 +288,49 @@ Workflow: `.github/workflows/ci.yml`
   - Lint: `tms-api`, `tms-web` (if lint target exists)
   - Build: `tms-api`, `tms-web`, `shipment-service`
   - Test: `tms-api` (if test script exists), `shipment-service` (Maven)
+
+---
+
+## Deployment
+
+### Docker (full stack)
+
+From the repo root:
+
+```bash
+docker compose up --build
+```
+
+- **tms-web:** http://localhost:5173 (nginx on port 80 inside container, mapped to 5173)
+- **tms-api:** http://localhost:3010 (GraphQL at `/api/v1/user`)
+- **shipment-service:** http://localhost:8082 (REST at `/api/shipments`)
+
+The frontend is built with `VITE_GRAPHQL_URI=http://localhost:3010/api/v1/user` so the browser talks to the API on your host. To use a different API URL, pass a build arg:
+
+```bash
+docker compose build --build-arg VITE_GRAPHQL_URI=https://your-api.example.com/api/v1/user tms-web
+docker compose up
+```
+
+Per-app images (from repo root):
+
+```bash
+docker build -f apps/tms-web/Dockerfile -t tms-web apps/tms-web
+docker build -f apps/tms-api/Dockerfile -t tms-api apps/tms-api
+docker build -f apps/shipment-service/Dockerfile -t shipment-service apps/shipment-service
+```
+
+### Vercel (frontend only)
+
+**tms-web** can be deployed to Vercel; **tms-api** and **shipment-service** must run elsewhere (e.g. Railway, Render, Fly.io, or your own server).
+
+1. **Import the repo** in [Vercel](https://vercel.com) and create a project.
+2. **Root Directory:** set to `apps/tms-web`.
+3. **Build:** Vercel will use `apps/tms-web/vercel.json` (or auto-detect Vite). Build command: `npm run build`; output: `dist`.
+4. **Environment variable:** add `VITE_GRAPHQL_URI` = your deployed tms-api base URL for the GraphQL endpoint, e.g. `https://tms-api.your-domain.com/api/v1/user`. This is baked in at build time.
+5. Deploy **tms-api** and **shipment-service** on another platform, then set **CORS** on tms-api to allow your Vercel frontend origin.
+
+Result: the Vercel URL serves the React app; the app calls your hosted tms-api for GraphQL.
 
 ---
 

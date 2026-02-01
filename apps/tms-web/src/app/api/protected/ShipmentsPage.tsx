@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "graphql-tag";
 import { ShipmentGrid } from "@/components/ShipmentGrid";
@@ -18,6 +19,7 @@ const SHIPMENTS_PAGINATED = gql`
         status
         rate
         createdAt
+        updatedAt
       }
       totalCount
       page
@@ -28,8 +30,22 @@ const SHIPMENTS_PAGINATED = gql`
 `;
 
 export function ShipmentsPage(): React.ReactElement {
-  const [view, setView] = useState<"grid" | "tile">("grid");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const viewParam = searchParams.get("view");
+  const [view, setView] = useState<"grid" | "tile">(viewParam === "tile" ? "tile" : "grid");
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const next = searchParams.get("view") === "tile" ? "tile" : "grid";
+    setView(next);
+  }, [searchParams]);
+
+  const onViewChange = (v: "grid" | "tile"): void => {
+    setView(v);
+    const next = new URLSearchParams(searchParams);
+    next.set("view", v);
+    setSearchParams(next, { replace: true });
+  };
   const { data, loading, error } = useQuery<{
     shipmentsPaginated: {
       items: Array<{
@@ -42,6 +58,7 @@ export function ShipmentsPage(): React.ReactElement {
         status: string;
         rate: string;
         createdAt: string;
+        updatedAt: string;
       }>;
       totalPages: number;
     };
@@ -53,7 +70,7 @@ export function ShipmentsPage(): React.ReactElement {
   const totalPages = data?.shipmentsPaginated?.totalPages ?? 0;
 
   return (
-    <Layout view={view} onViewChange={setView}>
+    <Layout view={view} onViewChange={onViewChange}>
       {loading && <p className="text-muted-foreground p-4">Loading shipments…</p>}
       {error && (
         <p className="text-red-600 p-4">
