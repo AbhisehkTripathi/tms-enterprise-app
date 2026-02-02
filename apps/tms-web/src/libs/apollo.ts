@@ -7,6 +7,11 @@ const graphqlUri =
   import.meta.env.VITE_GRAPHQL_URI ??
   (import.meta.env.PROD ? `${productionApiBase}/api/v1/user` : "http://localhost:3010/api/v1/user");
 
+/** Base URL of the API (origin only) for ping and other non-GraphQL calls. */
+export function getApiBaseUrl(): string {
+  return new URL(graphqlUri).origin;
+}
+
 const authLink = setContext((_, { headers }) => {
   const auth = getAuth();
   return {

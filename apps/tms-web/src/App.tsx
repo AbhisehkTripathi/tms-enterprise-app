@@ -1,6 +1,7 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ApolloProvider } from "@apollo/client/react";
-import { apolloClient } from "@/libs/apollo";
+import { apolloClient, getApiBaseUrl } from "@/libs/apollo";
 import { ProtectedRoute } from "@/app/api/protected/ProtectedRoute";
 import { ShipmentsPage } from "@/app/api/protected/ShipmentsPage";
 import { ShipmentDetailPage } from "@/app/api/protected/ShipmentDetailPage";
@@ -11,6 +12,10 @@ import { LoginDemoPage } from "@/app/LoginDemoPage";
 import { HomePage } from "@/app/HomePage";
 
 function App(): React.ReactElement {
+  useEffect(() => {
+    fetch(`${getApiBaseUrl()}/api/ping`).catch(() => {});
+  }, []);
+
   return (
     <ApolloProvider client={apolloClient}>
       <BrowserRouter>

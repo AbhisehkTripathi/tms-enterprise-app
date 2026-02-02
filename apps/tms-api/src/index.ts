@@ -33,6 +33,7 @@ import roleRoutes from "@routes/role.route";
 import storageRoutes from "@routes/storage.route";
 import userRoutes from "@routes/user.route";
 import shipmentRoutes from "@routes/shipment.route";
+import { getShipmentClient } from "@libs/shipmentClient";
 import { errorHandler, notFound } from "@libs/error.handler";
 
 const app: Application = express();
@@ -71,6 +72,13 @@ app.get("/api/demo", (req: Request, res: Response) => {
 
 app.get("/api/test", (req: Request, res: Response) => {
   res.json("test");
+});
+
+/** Lightweight visit ping so Render shows active logs when users land on the web app. */
+app.get("/api/ping", (_req: Request, res: Response) => {
+  const springClient = getShipmentClient();
+  if (springClient) springClient.get("/api/ping").catch(() => {});
+  res.status(204).end();
 });
 
 app.use("/api/v1/role", roleRoutes);
